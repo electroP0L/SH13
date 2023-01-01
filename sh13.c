@@ -319,15 +319,9 @@ int main(int argc, char ** argv)
 		
 			// Message 'D' : le joueur recoit ses trois cartes
 			case 'D':
-				char* carte1, carte2, carte3;
-				int* Tabligne;
-				sscanf(gbuffer,"D %s %s %s %d", carte1, carte2, carte3, Tabligne);
-				//On ajoute les objets de Tabligne dans le tableau tableCartes
-				for(int i=0; i<8; i++){
-					tableCartes[gId][i]=Tabligne[i];
-				}
-				
-
+				char* cartes[3];
+				sscanf(gbuffer,"D %s, %s, %s", cartes[0], cartes[1], cartes[2]);
+			
 				break;
 
 			// Message 'M' : le joueur recoit le n° du joueur courant Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go
@@ -344,10 +338,7 @@ int main(int argc, char ** argv)
 			case 'V': 
 				int numJoueurV, symbole, valeur;
 				sscanf(gbuffer,"V %d %d %d", numJoueurV, symbole, valeur);
-				if(valeur == 100){
-					tableCartes[numJoueurV][symbole]=valeur;
-				}
-				else
+				tableCartes[numJoueurV][symbole]=valeur;
 
 				break;
 		}
