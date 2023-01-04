@@ -319,17 +319,18 @@ int main(int argc, char ** argv)
 		
 			// Message 'D' : le joueur recoit ses trois cartes
 			case 'D':
-				char* cartes[3];
-				sscanf(gbuffer,"D %s, %s, %s", cartes[0], cartes[1], cartes[2]);
-			
+				sscanf(gbuffer,"D %d %d %d", &b[0], &b[1], &b[2]);
 				break;
 
 			// Message 'M' : le joueur recoit le n° du joueur courant Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go
 			case 'M':
 				int numJoueurM;
-				sscanf(gbuffer,"M %d", numJoueurM);
+				sscanf(gbuffer,"M %d", &numJoueurM);
 				if (numJoueurM==gId){
-				goEnabled=1;
+					goEnabled=1;
+				}
+				else{
+					goEnabled=0;
 				}
 
 				break;
@@ -337,8 +338,14 @@ int main(int argc, char ** argv)
 			// Message 'V' : le joueur recoit une valeur de tableCartes  ON ENVOIE LA VALEUR 100 pour O
 			case 'V': 
 				int numJoueurV, symbole, valeur;
-				sscanf(gbuffer,"V %d %d %d", numJoueurV, symbole, valeur);
-				tableCartes[numJoueurV][symbole]=valeur;
+				sscanf(gbuffer,"V %d %d %d", &numJoueurV, &symbole, &valeur);
+
+				if(tableCartes[numJoueurV][symbole]==-1){
+					tableCartes[numJoueurV][symbole]=valeur;
+				}
+				else if(tableCartes[numJoueurV][symbole]==100){
+					tableCartes[numJoueurV][symbole]=valeur;
+				}
 
 				break;
 		}
@@ -627,9 +634,9 @@ int main(int argc, char ** argv)
 
 	for (i=0;i<14;i++)
 		SDL_RenderDrawLine(renderer, 0,350+i*30,300,350+i*30);
-	SDL_RenderDrawLine(renderer, 100,350,100,740);
-	SDL_RenderDrawLine(renderer, 250,350,250,740);
-	SDL_RenderDrawLine(renderer, 300,350,300,740);
+		SDL_RenderDrawLine(renderer, 100,350,100,740);
+		SDL_RenderDrawLine(renderer, 250,350,250,740);
+		SDL_RenderDrawLine(renderer, 300,350,300,740);
 
         //SDL_RenderCopy(renderer, texture_grille, NULL, &dstrect_grille);
 	if (b[0]!=-1)
