@@ -27,34 +27,46 @@ char *nomcartes[]=
 int joueurCourant;
 int joueurselimines[4] = {-1,-1,-1,-1};
 
-void endgame(){
+int endgame(){
 	char buffer[256];
 
 	for(int i = 0; i < 4; i++){
 		for(int j = 0; j < 8; j++){
-			sprintf(buffer, "tableacarte %d %d %d", i, j, tableCartes[i][j]);
+			sprintf(buffer, "V %d %d %d", i, j, tableCartes[i][j]);
+			broadcastMessage(buffer);
+
+			sprintf(buffer, "M %d", 4);
 			broadcastMessage(buffer);
 		}
 	}
+	return -1;
 }
 
 int joueursuivant(int joueurCourant, int* joueurselimines){		//Une fonction pour passer au joueur suivant, en sautant les joueurs éliminés
 	char buffer[256];
-	//Si tous les joueurs ont perdu, on indique que le jeu est terminé et on dévoile le tableau tableacarte à tous les joueurs
+	//Si tous les joueurs ont perdu, on indique que le jeu est terminé et on dévoile le tableau tablecarte à tous les joueurs
 	if(joueurselimines[0]==1 && joueurselimines[1]==1 && joueurselimines[2]==1 && joueurselimines[3]==1){
 		endgame();
-		return -1;
+		joueurCourant=4;
 	}
 
-	joueurCourant++;
-	while(joueurselimines[joueurCourant]==1){
+	else{
 		joueurCourant++;
-		if(joueurCourant>4){
+		if(joueurCourant>3){
 			joueurCourant=0;
 		}
+		
+		while(joueurselimines[joueurCourant]==1){
+			joueurCourant++;
+			if(joueurCourant>3){
+				joueurCourant=0;
+			}
+		}
+
+		sprintf(buffer, "M %d", joueurCourant);
+		broadcastMessage(buffer);
 	}
-	sprintf(buffer, "M %d", joueurCourant);
-	broadcastMessage(buffer);
+	
 	return joueurCourant;
 }
 
@@ -66,6 +78,7 @@ void error(const char *msg)
 
 void melangerDeck()
 {
+		srand (time(NULL));
         int i;
         int index1,index2,tmp;
 
@@ -85,7 +98,7 @@ void createTable()
 	// Le joueur 0 possede les cartes d'indice 0,1,2
 	// Le joueur 1 possede les cartes d'indice 3,4,5 
 	// Le joueur 2 possede les cartes d'indice 6,7,8 
-	// Le joueur 3 possede les cartes d'indice 9,10,11 
+	// Le joueur 3 possede les cartes d'indice 9,10,11
 	// Le coupable est la carte d'indice 12
 	int i,j,c;
 
@@ -177,6 +190,8 @@ void printDeck() //Affiche le deck
 			printf("%2.2d ",tableCartes[i][j]);
 		puts("");
 	}
+
+	//printf("Le coupable est %d : %s\n",deck[12],nomcartes[deck[12]]);
 }
 
 void printClients() //Affiche la liste des clients tcp
@@ -277,7 +292,7 @@ int main(int argc, char *argv[])
 
 
 					//Etapes de création de la partie
-	printDeck();
+	//printDeck();
 	melangerDeck();
 	createTable();
 	printDeck();
@@ -347,7 +362,7 @@ int main(int argc, char *argv[])
                                 if (nbClients==4) 			//Si les joueurs sont enfin au complet
 				{
 					// On envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
-					sprintf(reply, "D %d %d %d", deck[0*3+1], deck[0*3+2], deck[0*3+3]);
+					sprintf(reply, "D %d %d %d", deck[0*3], deck[0*3+1], deck[0*3+2]);
 					sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);
 
 					for(i=0; i<8; i++){
@@ -356,7 +371,7 @@ int main(int argc, char *argv[])
 					}
 
 					// On envoie ses cartes au joueur 1, ainsi que la ligne qui lui correspond dans tableCartes
-					sprintf(reply, "D %d %d %d", deck[1*3+1], deck[1*3+2], deck[1*3+3]);
+					sprintf(reply, "D %d %d %d", deck[1*3], deck[1*3+1], deck[1*3+2]);
 					sendMessageToClient(tcpClients[1].ipAddress, tcpClients[1].port, reply);
 
 					for(i=0; i<8; i++){
@@ -365,7 +380,7 @@ int main(int argc, char *argv[])
 					}
 
 					// On envoie ses cartes au joueur 2, ainsi que la ligne qui lui correspond dans tableCartes
-					sprintf(reply, "D %d %d %d", deck[2*3+1], deck[2*3+2], deck[2*3+3]);
+					sprintf(reply, "D %d %d %d", deck[2*3], deck[2*3+1], deck[2*3+2]);
 					sendMessageToClient(tcpClients[2].ipAddress, tcpClients[2].port, reply);
 
 					for(i=0; i<8; i++){
@@ -374,7 +389,7 @@ int main(int argc, char *argv[])
 					}
 
 					// On envoie ses cartes au joueur 3, ainsi que la ligne qui lui correspond dans tableCartes
-					sprintf(reply, "D %d %d %d", deck[3*3+1], deck[3*3+2], deck[3*3+3]);
+					sprintf(reply, "D %d %d %d", deck[3*3], deck[3*3+1], deck[3*3+2]);
 					sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);
 
 					for(i=0; i<8; i++){
@@ -397,16 +412,30 @@ int main(int argc, char *argv[])
 		{
                 	case 'G':						//Déclarer un Guilty (considérer que N° ... est le méchant)
 					int GuiltId, askGuilty;
-					sscanf(buffer,"G %d", &GuiltId, &askGuilty);
-					//Si le joueur qui a envoyé le message n'a pas accusé la dernière carte du deck, il est éliminé
-					if(askGuilty != deck[13]){
-						joueurselimines[GuiltId] = 1;
-						sprintf(reply, "Le joueur %d a mal deviné, il a perdu :'( \n", GuiltId);
+					sscanf(buffer,"G %d %d", &GuiltId, &askGuilty);
+
+					//Si le joueur qui a envoyé le message a accusé la dernière carte du deck, il a gagné
+					if (askGuilty == deck[12]){
+						endgame();
+						sprintf(reply, ":D Le joueur %d a bien deviné, il a gagné :D \n", GuiltId);
 						broadcastMessage(reply);
-						joueurCourant = joueursuivant(joueurCourant, &joueurselimines);
+						return(0);
 					}
 
-					//Cas ou il a raison
+					//Si le joueur qui a envoyé le message n'a pas accusé la dernière carte du deck, il est éliminé
+					if(askGuilty != deck[12]){
+						joueurselimines[GuiltId] = 1;
+						sprintf(reply, ":( Le joueur %d a mal deviné, il a perdu :( \n", GuiltId);
+						broadcastMessage(reply);
+						joueurCourant = joueursuivant(joueurCourant, &joueurselimines);
+						if (joueurCourant == 4){	//On sort du jeu
+							sprintf(reply, ":(( Tous les joueurs ont été éliminés, vous avez perdu :((");
+							broadcastMessage(reply);
+							return(0);
+						}
+					}
+
+					
 
 				break;
                 	
