@@ -27,7 +27,7 @@ char *nomcartes[]=
 int joueurCourant;
 int joueurselimines[4] = {-1,-1,-1,-1};
 
-int endgame(){
+int endgame(int IdJoueur){
 	char buffer[256];
 
 	for(int i = 0; i < 4; i++){
@@ -35,8 +35,16 @@ int endgame(){
 			sprintf(buffer, "V %d %d %d", i, j, tableCartes[i][j]);
 			broadcastMessage(buffer);
 
-			sprintf(buffer, "M %d", 4);
-			broadcastMessage(buffer);
+			if(IdJoueur != -1){
+				if (i == IdJoueur){
+					sprintf(buffer, "M %d", 5);
+					sendMessageToClient(tcpClients[i].ipAddress, tcpClients[i].port, buffer);
+				}
+				else{
+					sprintf(buffer, "M %d", 4);
+					sendMessageToClient(tcpClients[i].ipAddress, tcpClients[i].port, buffer);
+				}
+			}
 		}
 	}
 	return -1;
@@ -46,7 +54,7 @@ int joueursuivant(int joueurCourant, int* joueurselimines){		//Une fonction pour
 	char buffer[256];
 	//Si tous les joueurs ont perdu, on indique que le jeu est terminé et on dévoile le tableau tablecarte à tous les joueurs
 	if(joueurselimines[0]==1 && joueurselimines[1]==1 && joueurselimines[2]==1 && joueurselimines[3]==1){
-		endgame();
+		endgame(-1);
 		joueurCourant=4;
 	}
 
@@ -416,7 +424,7 @@ int main(int argc, char *argv[])
 
 					//Si le joueur qui a envoyé le message a accusé la dernière carte du deck, il a gagné
 					if (askGuilty == deck[12]){
-						endgame();
+						endgame(GuiltId);
 						sprintf(reply, ":D Le joueur %d a bien deviné, il a gagné :D \n", GuiltId);
 						broadcastMessage(reply);
 						return(0);
@@ -425,6 +433,8 @@ int main(int argc, char *argv[])
 					//Si le joueur qui a envoyé le message n'a pas accusé la dernière carte du deck, il est éliminé
 					if(askGuilty != deck[12]){
 						joueurselimines[GuiltId] = 1;
+						sprintf(reply, "M %d", 4);
+						sendMessageToClient(tcpClients[GuiltId].ipAddress, tcpClients[GuiltId].port, reply);
 						sprintf(reply, ":( Le joueur %d a mal deviné, il a perdu :( \n", GuiltId);
 						broadcastMessage(reply);
 						joueurCourant = joueursuivant(joueurCourant, &joueurselimines);

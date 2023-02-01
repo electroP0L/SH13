@@ -28,6 +28,8 @@ int tableCartes[4][8];		//Le gros tableau avec les joueurs et les objets
 int b[3];
 int goEnabled;
 int connectEnabled;
+int victoryEnabled;
+int defeatEnabled;
 
 char *nbobjets[]={"5","5","5","5","4","3","3","3"};
 char *nbnoms[]={"Sebastian Moran", "irene Adler", "inspector Lestrade",
@@ -155,7 +157,7 @@ int main(int argc, char ** argv)
  
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
 
-    SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton; //On charge toutes les surfaces
+    SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton, *victory, *defeat; //On charge toutes les surfaces
 
 	deck[0] = IMG_Load("SH13_0.png");
 	deck[1] = IMG_Load("SH13_1.png");
@@ -180,8 +182,10 @@ int main(int argc, char ** argv)
 	objet[6] = IMG_Load("SH13_oeil_120x120.png");
 	objet[7] = IMG_Load("SH13_crane_120x120.png");
 
-	gobutton = IMG_Load("gobutton.png");
+	gobutton = IMG_Load("gobutton2.png");
 	connectbutton = IMG_Load("connectbutton.png");
+	victory = IMG_Load("victory2.png");
+	defeat = IMG_Load("defeat2.png");
 
 	strcpy(gNames[0],"-");
 	strcpy(gNames[1],"-");
@@ -206,7 +210,7 @@ int main(int argc, char ** argv)
 	goEnabled=0;
 	connectEnabled=1;
 
-    SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8];
+    SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8], *texture_victory, *texture_defeat; //On charge toutes les textures
 
 	for (i=0;i<13;i++)
 		texture_deck[i] = SDL_CreateTextureFromSurface(renderer, deck[i]);
@@ -215,6 +219,8 @@ int main(int argc, char ** argv)
 
     texture_gobutton = SDL_CreateTextureFromSurface(renderer, gobutton);
     texture_connectbutton = SDL_CreateTextureFromSurface(renderer, connectbutton);
+	texture_victory = SDL_CreateTextureFromSurface(renderer, victory);
+	texture_defeat = SDL_CreateTextureFromSurface(renderer, defeat);
 
     TTF_Font* Sans = TTF_OpenFont("sans.ttf", 15); 
     printf("Sans=%p\n",Sans);
@@ -322,7 +328,7 @@ int main(int argc, char ** argv)
 				sscanf(gbuffer,"D %d %d %d", &b[0], &b[1], &b[2]);
 				break;
 
-			// Message 'M' : le joueur recoit le n° du joueur courant Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go
+			// Message 'M' : le joueur recoit le n° du joueur courant Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go ou d'afficher la victoire ou la défaite
 			case 'M':
 				int numJoueurM;
 				sscanf(gbuffer,"M %d", &numJoueurM);
@@ -331,6 +337,12 @@ int main(int argc, char ** argv)
 				}
 				else{
 					goEnabled=0;
+					if (numJoueurM == 4){
+						defeatEnabled=1;
+					}
+					if (numJoueurM == 5){
+						victoryEnabled=1;
+					}
 				}
 
 				break;
@@ -658,9 +670,24 @@ int main(int argc, char ** argv)
 	// Le bouton go
 	if (goEnabled==1)
 	{
-        	SDL_Rect dstrect = { 500, 350, 200, 150 };
+        	SDL_Rect dstrect = { 400, 400, 230, 219 };
         	SDL_RenderCopy(renderer, texture_gobutton, NULL, &dstrect);
 	}
+
+	// La texture de victoire
+	if (victoryEnabled==1)
+	{
+			SDL_Rect dstrect = { 275, 400, 536, 207 };
+			SDL_RenderCopy(renderer, texture_victory, NULL, &dstrect);
+	}
+
+	// La texture de défaite
+	if (defeatEnabled==1)
+	{
+			SDL_Rect dstrect = { 275, 400, 536, 269 };
+			SDL_RenderCopy(renderer, texture_defeat, NULL, &dstrect);
+	}
+
 	// Le bouton connect
 	if (connectEnabled==1)
 	{
