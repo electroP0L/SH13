@@ -25,7 +25,7 @@ char *nomcartes[]=
   "inspector Hopkins", "Sherlock Holmes", "John Watson", "Mycroft Holmes",
   "Mrs. Hudson", "Mary Morstan", "James Moriarty"};
 int joueurCourant;
-int joueurselimines[4] = {-1,-1,-1,-1};
+int joueurselimines[4] = {0,0,0,0};
 
 int endgame(int IdJoueur){
 	char buffer[256];
@@ -433,6 +433,8 @@ int main(int argc, char *argv[])
 					//Si le joueur qui a envoyé le message n'a pas accusé la dernière carte du deck, il est éliminé
 					if(askGuilty != deck[12]){
 						joueurselimines[GuiltId] = 1;
+						sprintf(reply, "P %d %d %d %d", joueurselimines[0], joueurselimines[1], joueurselimines[2], joueurselimines[3]);
+						broadcastMessage(reply);
 						sprintf(reply, "M %d", 4);
 						sendMessageToClient(tcpClients[GuiltId].ipAddress, tcpClients[GuiltId].port, reply);
 						sprintf(reply, ":( Le joueur %d a mal deviné, il a perdu :( \n", GuiltId);

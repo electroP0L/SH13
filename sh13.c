@@ -30,6 +30,7 @@ int goEnabled;
 int connectEnabled;
 int victoryEnabled;
 int defeatEnabled;
+int defeatedplayers[4]={0,0,0,0};
 
 char *nbobjets[]={"5","5","5","5","4","3","3","3"};
 char *nbnoms[]={"Sebastian Moran", "irene Adler", "inspector Lestrade",
@@ -157,7 +158,7 @@ int main(int argc, char ** argv)
  
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
 
-    SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton, *victory, *defeat; //On charge toutes les surfaces
+    SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton, *victory, *defeat, *defeated; //On charge toutes les surfaces
 
 	deck[0] = IMG_Load("SH13_0.png");
 	deck[1] = IMG_Load("SH13_1.png");
@@ -186,6 +187,7 @@ int main(int argc, char ** argv)
 	connectbutton = IMG_Load("connectbutton.png");
 	victory = IMG_Load("victory2.png");
 	defeat = IMG_Load("defeat2.png");
+	defeated = IMG_Load("defeated.png");
 
 	strcpy(gNames[0],"-");
 	strcpy(gNames[1],"-");
@@ -210,7 +212,7 @@ int main(int argc, char ** argv)
 	goEnabled=0;
 	connectEnabled=1;
 
-    SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8], *texture_victory, *texture_defeat; //On charge toutes les textures
+    SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8], *texture_victory, *texture_defeat, *texture_defeated; //On charge toutes les textures
 
 	for (i=0;i<13;i++)
 		texture_deck[i] = SDL_CreateTextureFromSurface(renderer, deck[i]);
@@ -221,6 +223,7 @@ int main(int argc, char ** argv)
     texture_connectbutton = SDL_CreateTextureFromSurface(renderer, connectbutton);
 	texture_victory = SDL_CreateTextureFromSurface(renderer, victory);
 	texture_defeat = SDL_CreateTextureFromSurface(renderer, defeat);
+	texture_defeated = SDL_CreateTextureFromSurface(renderer, defeated);
 
     TTF_Font* Sans = TTF_OpenFont("sans.ttf", 15); 
     printf("Sans=%p\n",Sans);
@@ -271,7 +274,7 @@ int main(int argc, char ** argv)
 					int ind=(my-350)/30;
 					guiltGuess[ind]=1-guiltGuess[ind];
 				}
-				else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled==1))		//Si on clique sur le bouton go
+				else if ((mx>=400) && (mx<630) && (my>=400) && (my<619) && (goEnabled==1))		//Si on clique sur le bouton go
 				{
 					printf("go! joueur=%d objet=%d guilt=%d\n",joueurSel, objetSel, guiltSel);
 					if (guiltSel!=-1)
@@ -314,7 +317,6 @@ int main(int argc, char ** argv)
 			// Message 'I' : le joueur recoit son Id
 			case 'I':
 				sscanf(gbuffer,"I %d",&gId); 
-
 				break;
 		
 			// Message 'L' : le joueur recoit la liste des joueurs
@@ -359,6 +361,11 @@ int main(int argc, char ** argv)
 					tableCartes[numJoueurV][symbole]=valeur;
 				}
 
+				break;
+			
+			// Message 'P' : le joueur recoit une valeur du tableau des joueurs perdants
+			case 'P':
+				sscanf(gbuffer,"P %d %d %d %d", &defeatedplayers[0], &defeatedplayers[1], &defeatedplayers[2], &defeatedplayers[3]);
 				break;
 		}
 		synchro=0;
@@ -687,6 +694,26 @@ int main(int argc, char ** argv)
 			SDL_Rect dstrect = { 275, 400, 536, 269 };
 			SDL_RenderCopy(renderer, texture_defeat, NULL, &dstrect);
 	}
+
+	//Les textures des indications des joueurs battus
+
+	if (defeatedplayers[0] == 1){
+		SDL_Rect dstrect = { 690, 95, 45, 45 };
+		SDL_RenderCopy(renderer, texture_defeated, NULL, &dstrect);
+	}
+	if (defeatedplayers[1] == 1){
+		SDL_Rect dstrect = { 690, 155, 45, 45 };
+		SDL_RenderCopy(renderer, texture_defeated, NULL, &dstrect);
+	}
+	if (defeatedplayers[2] == 1){
+		SDL_Rect dstrect = { 690, 215, 45, 45 };
+		SDL_RenderCopy(renderer, texture_defeated, NULL, &dstrect);
+	}
+	if (defeatedplayers[3] == 1){
+		SDL_Rect dstrect = { 690, 275, 45, 45 };
+		SDL_RenderCopy(renderer, texture_defeated, NULL, &dstrect);
+	}
+	
 
 	// Le bouton connect
 	if (connectEnabled==1)
