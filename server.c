@@ -483,18 +483,9 @@ int main(int argc, char *argv[])
 			case 'S': 								//Toi, joueur n° tant, combien as-tu de cartes associées à tel symbole ? 
 				int askingId, askedId, askSymboleS;
 				sscanf(buffer,"S %d %d %d", &askingId, &askedId, &askSymboleS);
-				if(tableCartes[askedId][askSymboleS] !=0){
-
-					//Le joueur askedId a le symbole askSymbole - On l'envoie au joueur qui a demandé (askId)
-					sprintf(reply, "V %d %d %d", askedId, askSymboleS, tableCartes[askedId][askSymboleS]);
-					sendMessageToClient(tcpClients[askingId].ipAddress, tcpClients[askingId].port, reply);
-				}
-				else{
-					//Le joueur askedId n'a pas le symbole askSymbole - On l'envoie au joueur qui a demandé (askId)
-					sprintf(reply, "V %d %d %d", askedId, askSymboleS, 0);
-					sendMessageToClient(tcpClients[askingId].ipAddress, tcpClients[askingId].port, reply);
-					continue;
-				}
+				//Le joueur askedId a le symbole askSymbole - On l'envoie au joueur qui a demandé (askId)
+				sprintf(reply, "V %d %d %d", askedId, askSymboleS, tableCartes[askedId][askSymboleS]);
+				sendMessageToClient(tcpClients[askingId].ipAddress, tcpClients[askingId].port, reply);
 				joueurCourant = joueursuivant(joueurCourant, &joueurselimines);
 				break;
                 	default:
