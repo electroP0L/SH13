@@ -480,7 +480,7 @@ int main(int argc, char *argv[])
 					joueurCourant = joueursuivant(joueurCourant, &joueurselimines);
 
 				break;
-			case 'S': 								//Toi, joueur n° tant, combien as-tu de collonnes associées à tel symbole ? 
+			case 'S': 								//Toi, joueur n° tant, combien as-tu de cartes associées à tel symbole ? 
 				int askingId, askedId, askSymboleS;
 				sscanf(buffer,"S %d %d %d", &askingId, &askedId, &askSymboleS);
 				if(tableCartes[askedId][askSymboleS] !=0){
