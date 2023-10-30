@@ -1,5 +1,5 @@
 # SH13
-A shool project we worked on - The goal was to code in C a simple connected board game based on the universe of Sherlock Holmes.
+A shool project we worked on - The goal was to The goal was to complete a C code written by Mr. François Pecheux, our professor. SH13 is a game based on the universe of Sherlock Holmes.
 
 To launch our version of the game :
 - Get the sh13 repository on your computer.
